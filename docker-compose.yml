@@ -13,8 +13,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    ports:
-      - "5433:5432"
 
   ai-service:
     build:
@@ -22,11 +20,11 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      LLM_PROVIDER: ollama
+      OPENAI_API_KEY: ""
+      ANTHROPIC_API_KEY: ""
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3}
+      OLLAMA_MODEL: llama3.2
     ports:
       - "8001:8000"
 
@@ -46,7 +44,7 @@ services:
       DB_NAME: ${DB_NAME:-iam_advisor}
       JWT_SECRET: ${JWT_SECRET:-supersecretchangeme}
       AI_SERVICE_URL: http://ai-service:8000
-      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5174}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
       PORT: 8080
     ports:
       - "8081:8080"
@@ -61,7 +59,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "5174:80"
+      - "5173:80"
 
 volumes:
   pgdata:

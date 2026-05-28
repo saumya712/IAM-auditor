@@ -80,11 +80,15 @@ class OllamaClient:
         payload = {
             "model": self._model,
             "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            "stream": False,
-        }
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+         "stream": False,
+         "options": {
+            "num_predict": 4096,
+            "temperature": 0
+    }
+}
         async with httpx.AsyncClient(timeout=60) as client:
             resp = await client.post(f"{self._base_url}/api/chat", json=payload)
             resp.raise_for_status()

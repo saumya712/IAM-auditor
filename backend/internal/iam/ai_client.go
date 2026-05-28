@@ -48,7 +48,7 @@ func NewHTTPAIClient(baseURL string) *HTTPAIClient {
 	return &HTTPAIClient{
 		baseURL: baseURL,
 		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: 120 * time.Second,
 		},
 	}
 }

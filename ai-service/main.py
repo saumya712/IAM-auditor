@@ -82,10 +82,12 @@ Do NOT include any text outside the JSON object. Do NOT wrap it in markdown code
 def _parse_llm_json(raw: str) -> dict:
     """Strip optional markdown fences and parse JSON from LLM output."""
     text = raw.strip()
+    # Remove leading text before first {
+    brace_idx = text.find("{")
+    if brace_idx > 0:
+        text = text[brace_idx:]
     if text.startswith("```"):
-        # Remove opening fence (```json or ```)
         text = text.split("\n", 1)[-1]
-        # Remove closing fence
         if text.endswith("```"):
             text = text[: text.rfind("```")]
     return json.loads(text.strip())
@@ -106,8 +108,13 @@ async def generate_policy(request: GeneratePolicyRequest) -> GeneratePolicyRespo
 
     try:
         data = _parse_llm_json(raw)
-        policy = data["policy"]
-        explanation = data["explanation"]
+        # Handle case where LLM returns raw policy instead of wrapped response
+        if "policy" not in data:
+            policy = data
+            explanation = "Policy generated successfully."
+        else:
+            policy = data["policy"]
+            explanation = data["explanation"] if isinstance(data["explanation"], str) else json.dumps(data["explanation"])
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
         raise HTTPException(
             status_code=500, detail=f"failed to parse LLM response: {exc}"
