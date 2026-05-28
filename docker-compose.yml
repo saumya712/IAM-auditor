@@ -14,17 +14,15 @@ services:
       timeout: 5s
       retries: 10
 
-  ai-service:
+    ai-service:
     build:
       context: ./ai-service
       dockerfile: Dockerfile
-    restart: unless-stopped
-    environment:
-      LLM_PROVIDER: ollama
-      OPENAI_API_KEY: ""
-      ANTHROPIC_API_KEY: ""
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      OLLAMA_MODEL: llama3.2
+      restart: unless-stopped
+      environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-groq}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.1-8b-instant}
     ports:
       - "8001:8000"
 

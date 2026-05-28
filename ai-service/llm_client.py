@@ -96,6 +96,27 @@ class OllamaClient:
             return data.get("message", {}).get("content", "")
 
 
+class GroqClient:
+    def __init__(self) -> None:
+        try:
+            from groq import AsyncGroq
+        except ImportError as exc:
+            raise RuntimeError("groq package is required") from exc
+        self._client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
+        self._model = os.getenv("GROQ_MODEL", "mixtral-8x7b-32768")
+
+    async def complete(self, system: str, user: str) -> str:
+        response = await self._client.chat.completions.create(
+            model=self._model,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user}
+            ],
+            temperature=0
+        )
+        return response.choices[0].message.content or ""
+
+
 def get_llm_client() -> LLMClient:
     """Factory that returns the appropriate LLMClient based on LLM_PROVIDER env var."""
     provider = os.getenv("LLM_PROVIDER", "openai").lower()
@@ -105,4 +126,6 @@ def get_llm_client() -> LLMClient:
         return AnthropicClient()
     if provider == "ollama":
         return OllamaClient()
+    if provider == "groq":
+        return GroqClient()
     raise ValueError(f"Unknown LLM_PROVIDER: {provider!r}. Choose 'openai', 'anthropic', or 'ollama'.")
